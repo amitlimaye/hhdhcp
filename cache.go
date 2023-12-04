@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type cache struct {
+type pluginCache struct {
 	data map[string]string
 	sync.RWMutex
 }
@@ -21,17 +21,17 @@ type Cache interface {
 type CallbackFunc func(key string, val string)
 
 func NewCache() Cache {
-	return &cache{
+	return &pluginCache{
 		data: map[string]string{},
 	}
 }
-func (c *cache) Add(key string, value string) {
+func (c *pluginCache) Add(key string, value string) {
 	c.Lock()
 	c.data[key] = value
 	c.Unlock()
 }
 
-func (c *cache) Get(key string) (string, error) {
+func (c *pluginCache) Get(key string) (string, error) {
 	c.RLock()
 	defer c.RUnlock()
 	if val, ok := c.data[key]; ok {
@@ -40,7 +40,7 @@ func (c *cache) Get(key string) (string, error) {
 	return "", nil
 }
 
-func (c *cache) AddWithTTL(key string, value string, ttl time.Duration, callbackFunc CallbackFunc) {
+func (c *pluginCache) AddWithTTL(key string, value string, ttl time.Duration, callbackFunc CallbackFunc) {
 	c.Lock()
 	c.data[key] = value
 	go func() {
@@ -56,13 +56,13 @@ func (c *cache) AddWithTTL(key string, value string, ttl time.Duration, callback
 
 }
 
-func (c *cache) Delete(key string) {
+func (c *pluginCache) Delete(key string) {
 	c.Lock()
 	delete(c.data, key)
 	c.Unlock()
 }
 
-func (c *cache) Keys() []string {
+func (c *pluginCache) Keys() []string {
 	c.Lock()
 	defer c.Unlock()
 	keys := make([]string, len(c.data))

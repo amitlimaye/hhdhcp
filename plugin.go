@@ -55,11 +55,11 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	//
 	pluginHdl.Lock()
 	defer pluginHdl.Unlock()
-	if val, err := pluginHdl.mactoIPMap.Get(req.ClientHWAddr.String()); err == nil {
-		resp.Options.Update(dhcpv4.OptIPAddressLeaseTime(leaseTime))
-		resp.YourIPAddr = val.(net.IP)
+	// if val, err := pluginHdl.mactoIPMap.Get(req.ClientHWAddr.String()); err == nil {
+	// 	resp.Options.Update(dhcpv4.OptIPAddressLeaseTime(leaseTime))
+	// 	resp.YourIPAddr = val.(net.IP)
 
-	}
+	// }
 	// Is there a learnt subnet for (VrfName,VlanName)
 	circuitID := dhcpv4.RelayOptions.Get(dhcpv4.RelayOptions{}, dhcpv4.OptionRelayAgentInformation)
 	fmt.Println(circuitID)
