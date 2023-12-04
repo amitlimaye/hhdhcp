@@ -2,7 +2,6 @@ package hhdhcp
 
 import (
 	"fmt"
-	"net"
 	"sync"
 	"time"
 
@@ -39,8 +38,8 @@ var pluginHdl *pluginState
 func setuphhdhcp4(args ...string) (handler.Handler4, error) {
 	log.Infof("loaded HH plugin for DHCPv4.")
 	pluginHdl = &pluginState{
-		mactoIPMap: make(map[string]net.IPNet),
-		ranges:     make(map[rangeKey]IPv4Allocator),
+		//mactoIPMap: make(map[string]net.IPNet),
+		ranges: make(map[rangeKey]IPv4Allocator),
 	}
 	return Handler4, nil
 }
