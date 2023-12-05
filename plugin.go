@@ -59,7 +59,7 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 
 	// }
 	// Is there a learnt subnet for (VrfName,VlanName)
-	circuitID := dhcpv4.RelayOptions.Get(dhcpv4.RelayOptions{}, dhcpv4.OptionRelayAgentInformation)
+	circuitID := dhcpv4.RelayOptions().String()
 	if len(circuitID) > 0 {
 		fmt.Println(circuitID)
 	}
