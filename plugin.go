@@ -63,7 +63,7 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	if relayAgentInfo != nil {
 		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
 		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
-		fmt.Println("Checking", vrfName, circuitID)
+		fmt.Println("Checking", string(vrfName), string(circuitID))
 	}
 
 	//vrfName := dhcpv4.RelayOptions.Get(dhcpv4)
