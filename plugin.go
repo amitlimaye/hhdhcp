@@ -1,6 +1,7 @@
 package hhdhcp
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -60,7 +61,9 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	// Is there a learnt subnet for (VrfName,VlanName)
 	relayAgentInfo := req.RelayAgentInfo()
 	if relayAgentInfo != nil {
-		relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
+		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
+		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
+		fmt.Println("Checking", vrfName, circuitID)
 	}
 
 	//vrfName := dhcpv4.RelayOptions.Get(dhcpv4)
