@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	//"github.com/coredhcp/coredhcp/handler"
+	"github.com/coredhcp/coredhcp/handler"
 	"github.com/coredhcp/coredhcp/logger"
 	"github.com/coredhcp/coredhcp/plugins"
 	"github.com/insomniacslk/dhcp/dhcpv4"
@@ -60,7 +60,7 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	// }
 	// Is there a learnt subnet for (VrfName,VlanName)
 	circuitID := dhcpv4.RelayOptions.Get(dhcpv4.RelayOptions{}, dhcpv4.OptionRelayAgentInformation)
-	if len(circuitID.([]byte)) > 0 {
+	if len(circuitID) > 0 {
 		fmt.Println(circuitID)
 	}
 	//vrfName := dhcpv4.RelayOptions.Get(dhcpv4)
