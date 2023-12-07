@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strings"
 )
 
 type RecordBackend interface {
@@ -39,10 +40,10 @@ func NewBackend() RecordBackend {
 func (r *recordBackend) GetRange(meta map[string]string) (*rangeRecord, error) {
 	if val, ok := meta["vrfName"]; ok {
 		log.Infof("found vrfName %s %v", val, r.subnets["VrfDhcp"])
-		if val != "VrfDhcp" {
-			log.Infof("What is this %v %v", []byte(val), []byte("VrfDhcp"))
+		if strings.TrimSpace(val) != "VrfDhcp" {
+			log.Infof("What is this %v %v", []byte(strings.TrimSpace(val)), []byte("VrfDhcp"))
 		}
-		return r.subnets[val], nil
+		return r.subnets[strings.TrimSpace(val)], nil
 	}
 	return nil, errors.New("no range found")
 }
