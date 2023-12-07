@@ -52,6 +52,7 @@ func NewIPv4Range(start, end, gateway net.IP, count int, prefixLen uint32) (*ipv
 	}
 
 	if r.Start-r.End+1 != uint32(count) {
+		log.Errorf("Count %d,range %d", count, r.Start, r.End+1)
 		return nil, errors.New("count does not match range")
 	}
 
