@@ -21,7 +21,7 @@ type ipv4range struct {
 	sync.RWMutex
 }
 
-func NewIPv4Range(start, end, gateway net.IP, count int, prefixLen uint32) (*ipv4range, error) {
+func NewIPv4Range(start, end, gateway net.IP, count uint32, prefixLen uint32) (*ipv4range, error) {
 	if start.To4() == nil || end.To4() == nil {
 		return nil, fmt.Errorf("invalid IPv4 addresses given to create the range: [%s,%s]", start, end)
 	}
