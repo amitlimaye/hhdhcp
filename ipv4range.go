@@ -16,7 +16,7 @@ type ipv4range struct {
 	End     uint32
 	gateway uint32
 	Mask    net.IPMask
-	Count   int
+	Count   uint32
 	bitmap  *bitset.BitSet
 	sync.RWMutex
 }
