@@ -43,7 +43,7 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 			count := binary.BigEndian.Uint32(record.EndIP) - binary.BigEndian.Uint32(record.StartIP) + 1
 			iprange, err := NewIPv4Range(record.StartIP, record.EndIP, record.Gateway, prefixLen, count)
 			if err != nil {
-				return fmt.Errorf("unable to create range for vrf %s circuiId %s", string(vrfName), string(circuitID))
+				return fmt.Errorf("unable to create range for vrf %s circuiId %s,err", string(vrfName), string(circuitID), err)
 
 			}
 			val = &allocations{
