@@ -1,6 +1,7 @@
 package hhdhcp
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -18,8 +19,8 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 	var ok bool
 	var err error
 	if relayAgentInfo != nil {
-		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
-		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
+		circuitID := bytes.Trim(relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption), "\x00")
+		vrfName := bytes.Trim(relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption), "\x00")
 		log.Infof("vrfName: %v:%s circuitID: %v,%s", vrfName, string(vrfName), circuitID, string(circuitID))
 		if val, ok = pluginHdl.ranges[string(vrfName)+string(circuitID)]; !ok {
 			// Call record backend to see if the backend can retrieve this
