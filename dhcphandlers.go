@@ -20,6 +20,7 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 	if relayAgentInfo != nil {
 		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
 		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
+		log.Infof("vrfName: %s circuitID: %s", string(vrfName), string(circuitID))
 		if val, ok = pluginHdl.ranges[string(vrfName)+string(circuitID)]; !ok {
 			// Call record backend to see if the backend can retrieve this
 			backendKey := map[string]string{
@@ -32,6 +33,9 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 			}
 
 			//start, end, gateway, count := parseRecord(record.subnet)
+			if record == nil {
+				log.Errorf("Record not found for vrf %s circuiId %s", string(vrfName), string(circuitID))
+			}
 			prefixLen, _ := record.CIDRBlock.Mask.Size()
 			count := binary.BigEndian.Uint32(record.EndIP) - binary.BigEndian.Uint32(record.StartIP) + 1
 			iprange, err := NewIPv4Range(record.StartIP, record.EndIP, record.Gateway, prefixLen, count)
