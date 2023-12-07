@@ -1,6 +1,7 @@
 package hhdhcp
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 	"time"
@@ -27,15 +28,16 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 			}
 			record, err := pluginHdl.backend.GetRange(backendKey)
 			if err != nil {
-				return fmt.Errorf("Unknow vrf %s circuiId %s", string(vrfName), string(circuitID))
+				return fmt.Errorf("unknown vrf %s circuiId %s", string(vrfName), string(circuitID))
 			}
 
-			start, end, gateway, count := parseRecord(record.subnet)
-			prefixLen, _ := record.subnet.Mask.Size()
-			iprange, err := NewIPv4Range(start, end, gateway, prefixLen, count)
+			//start, end, gateway, count := parseRecord(record.subnet)
+			prefixLen, _ := record.CIDRBlock.Mask.Size()
+			count := binary.BigEndian.Uint32(record.EndIP) - binary.BigEndian.Uint32(record.StartIP) + 1
+			iprange, err := NewIPv4Range(record.StartIP, record.EndIP, record.Gateway, prefixLen, count)
 			if err != nil {
-				log.Errorf("Unable to create range for vrf %s circuiId %s", string(vrfName))
-				return err
+				return fmt.Errorf("unable to create range for vrf %s circuiId %s", string(vrfName), string(circuitID))
+
 			}
 			val = &allocations{
 				pool: iprange,
@@ -49,7 +51,7 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 
 		ipnet, err = val.pool.Allocate()
 		if err != nil {
-			return fmt.Errorf("Unable to allocate IP for vrf %s circuiId %s error %s", string(vrfName), string(circuitID), err)
+			return fmt.Errorf("unable to allocate IP for vrf %s circuiId %s error %s", string(vrfName), string(circuitID), err)
 		}
 
 		// Update the pending IP address list
@@ -72,5 +74,19 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 }
 
 func handleDiscover4Request(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
+	relayAgentInfo := req.RelayAgentInfo()
+	if relayAgentInfo != nil {
+		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
+		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
+		// if val, ok := pluginHdl.ranges[string(vrfName)+string(circuitID)]; !ok {
+		// 	return fmt.Errorf("unknown vrf %s circuiId %s", string(vrfName), string(circuitID)
+		// }else{
+		// 	val.pending.Lock()
+		// 	if mac,ok := val.pending.allocation[string(req.ClientIPAddr)];ok {}
+		// 	val.pending.Unlock()
+		// }
+		log.Infof("vrf %s circuiId %s req Summary %s", string(vrfName), string(circuitID), req.Summary())
+
+	}
 	return nil
 }

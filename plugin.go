@@ -42,9 +42,14 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	case dhcpv4.MessageTypeDiscover:
 		// Find the IP address that was is avialable for this (VrfName,VlanName) combination
 		// Send the DHCP offer
-		handleDiscover4(req, resp)
+		if err := handleDiscover4(req, resp); err == nil {
+			return resp, false
+		} else {
+			return resp, true
+		}
 	case dhcpv4.MessageTypeRequest:
 		// Check if the ip was actually offered and commit if the the offer came from the right client
+		handleDiscover4Request(req, resp)
 	case dhcpv4.MessageTypeRelease:
 		// Find the IP address. Check if the ip was actually offered to the client and release the lease.
 	case dhcpv4.MessageTypeDecline:
@@ -55,9 +60,4 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 
 	//vrfName := dhcpv4.RelayOptions.Get(dhcpv4)
 	return resp, false
-}
-
-// This function returns the key that can be  used to retrieve the range that represents
-func findSubnet(keys map[string]string) (string, error) {
-	return "", nil
 }
