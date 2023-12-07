@@ -20,7 +20,7 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 	if relayAgentInfo != nil {
 		circuitID := relayAgentInfo.Get(dhcpv4.AgentCircuitIDSubOption)
 		vrfName := relayAgentInfo.Get(dhcpv4.VirtualSubnetSelectionSubOption)
-		log.Infof("vrfName: %s circuitID: %s", string(vrfName), string(circuitID))
+		log.Infof("vrfName: %v:%s circuitID: %s", vrfName, string(vrfName), string(circuitID))
 		if val, ok = pluginHdl.ranges[string(vrfName)+string(circuitID)]; !ok {
 			// Call record backend to see if the backend can retrieve this
 			backendKey := map[string]string{
