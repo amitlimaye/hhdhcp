@@ -38,7 +38,7 @@ func NewBackend() RecordBackend {
 
 func (r *recordBackend) GetRange(meta map[string]string) (*rangeRecord, error) {
 	if val, ok := meta["vrfName"]; ok {
-		log.Infof("found vrfName %s %v", val, r.subnets[val])
+		log.Infof("found vrfName %s %v", val, r.subnets["VrfDhcp"])
 
 		return r.subnets[val], nil
 	}
