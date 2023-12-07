@@ -15,6 +15,7 @@ type RecordBackend interface {
 
 func NewBackend() RecordBackend {
 	// Sync from kubernetes backend if it exists
+
 	r := &recordBackend{
 		subnets: map[string]*rangeRecord{
 			"VrfDhcp": {
@@ -31,14 +32,14 @@ func NewBackend() RecordBackend {
 			},
 		},
 	}
-
+	log.Infof("Defined subnets: %v", r.subnets)
 	return r
 }
 
 func (r *recordBackend) GetRange(meta map[string]string) (*rangeRecord, error) {
 	if val, ok := meta["vrfName"]; ok {
 		log.Infof("found vrfName %s", val)
-		log.Infof("subnet %v", r.subnets[val])
+		log.Infof("subnet %v", r.subnets)
 		return r.subnets[val], nil
 	}
 	return nil, errors.New("no range found")
