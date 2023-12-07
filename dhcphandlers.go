@@ -32,10 +32,10 @@ func handleDiscover4(req *dhcpv4.DHCPv4, resp *dhcpv4.DHCPv4) error {
 				return fmt.Errorf("unknown vrf %s circuiId %s", string(vrfName), string(circuitID))
 			}
 
-			//start, end, gateway, count := parseRecord(record.subnet)
 			if record == nil {
-				log.Errorf("Record not found for vrf %s circuiId %s", string(vrfName), string(circuitID))
+				return fmt.Errorf("unknown vrf %s circuiId %s", string(vrfName), string(circuitID))
 			}
+
 			prefixLen, _ := record.CIDRBlock.Mask.Size()
 			count := binary.BigEndian.Uint32(record.EndIP) - binary.BigEndian.Uint32(record.StartIP) + 1
 			iprange, err := NewIPv4Range(record.StartIP, record.EndIP, record.Gateway, prefixLen, count)

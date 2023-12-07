@@ -45,6 +45,7 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 		if err := handleDiscover4(req, resp); err == nil {
 			return resp, false
 		} else {
+			log.Errorf("handleDiscover4 error: %s", err)
 			return resp, true
 		}
 	case dhcpv4.MessageTypeRequest:
