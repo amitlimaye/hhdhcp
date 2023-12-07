@@ -18,7 +18,7 @@ func NewBackend() RecordBackend {
 
 	r := &recordBackend{
 		subnets: map[string]*rangeRecord{
-			"VrfDhcp": &rangeRecord{
+			"VrfDhcp": {
 				StartIP: net.ParseIP("10.10.30.2"),
 				EndIP:   net.ParseIP("10.10.30.254"),
 				Subnet:  "VrfDhcp/default",
@@ -32,7 +32,7 @@ func NewBackend() RecordBackend {
 			},
 		},
 	}
-	log.Infof("Defined subnets: %v", r.subnets)
+	log.Infof("Defined subnets: %v", r.subnets["VrfDhcp"])
 	return r
 }
 
