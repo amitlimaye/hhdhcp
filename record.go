@@ -5,19 +5,13 @@ import (
 	"fmt"
 	"net"
 	"reflect"
-	"strings"
+	"time"
 )
-
-type RecordBackend interface {
-	GetRange(key map[string]string) (*rangeRecord, error)
-	RecordAllocation(key map[string]string, alloc *allocationRecord) error
-	ReleaseAllocation(key map[string]string, ip net.IP) error
-}
 
 func NewBackend() RecordBackend {
 	// Sync from kubernetes backend if it exists
 
-	r := &recordBackend{
+	r := &persistentBackend{
 		subnets: map[string]*rangeRecord{
 			"VrfDhcp": {
 				StartIP: net.ParseIP("10.10.30.2"),
@@ -33,31 +27,48 @@ func NewBackend() RecordBackend {
 			},
 		},
 	}
+	// Debug routine
+	go func() {
+		ticker := time.NewTicker(time.Second * 10)
+		for {
+			select {
+			case <-ticker.C:
+				log.Infof("---Recorded Leases: %d----", len(r.subnets["VrfDhcp"].records))
+			}
+
+		}
+	}()
+	return r
 	log.Infof("Defined subnets: %v", r.subnets["VrfDhcp"])
 	return r
 }
 
-func (r *recordBackend) GetRange(meta map[string]string) (*rangeRecord, error) {
+func (r *persistentBackend) GetRange(meta map[string]string) (*rangeRecord, error) {
 	if val, ok := meta["vrfName"]; ok {
-		log.Infof("found vrfName %s %v", val, r.subnets["VrfDhcp"])
-		if strings.TrimSpace(val) != "VrfDhcp" {
-			log.Infof("What is this %v %v", []byte(strings.TrimSpace(val)), []byte("VrfDhcp"))
-		}
-		return r.subnets[strings.TrimSpace(val)], nil
+		return r.subnets[val], nil
 	}
 	return nil, errors.New("no range found")
 }
 
-func (r *recordBackend) RecordAllocation(meta map[string]string, alloc *allocationRecord) error {
+func (r *persistentBackend) RecordAllocation(meta map[string]string, alloc *allocationRecord) error {
 	if val, ok := meta["vrfName"]; ok {
+		// if allocation already exists skip allocation
+
 		if record, ok := r.subnets[val]; ok {
+			for _, rec := range record.records {
+				if rec.IP.Equal(alloc.IP) {
+					return nil
+				}
+			}
 			record.records = append(record.records, alloc)
+			r.subnets[val] = record
+			return nil
 		}
 	}
 	return nil
 }
 
-func (r *recordBackend) ReleaseAllocation(key map[string]string, ip net.IP) error {
+func (r *persistentBackend) ReleaseAllocation(key map[string]string, ip net.IP, macAddress string) error {
 	if val, ok := key["vrfName"]; ok {
 		if record, ok := r.subnets[val]; ok {
 			for i, rec := range record.records {

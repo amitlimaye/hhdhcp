@@ -51,7 +51,7 @@ func NewIPv4Range(start, end, gateway net.IP, count uint32, prefixLen uint32) (*
 		r.bitmap.Set(offset) // Reserve the gateway IP
 	}
 
-	if r.Start-r.End+1 != uint32(count) {
+	if r.End-r.Start+1 != uint32(count) {
 		log.Errorf("Count %d,range %d", count, r.End-r.Start+1)
 		return nil, errors.New("count does not match range")
 	}
@@ -104,7 +104,7 @@ func (r *ipv4range) allocate() (net.IPNet, error) {
 	}
 
 	next = avail
-
+	log.Infof("allocating address %s", r.toIP(uint32(next)).String())
 	r.bitmap.Set(next)
 	return net.IPNet{
 		IP:   r.toIP(uint32(next)),
@@ -116,10 +116,16 @@ func (r *ipv4range) allocate() (net.IPNet, error) {
 func (r *ipv4range) Free(ip net.IPNet) error {
 	r.Lock()
 	defer r.Unlock()
-	if !r.bitmap.Test(uint(binary.BigEndian.Uint32(ip.IP.To4()))) {
+	offset, err := r.toOffset(ip.IP.To4())
+	if err != nil {
+		return fmt.Errorf("invalid ip address %s: %v", ip.IP.String(), err)
+	}
+	if !r.bitmap.Test(offset) {
 		return errors.New("ip address is not allocated in this range")
 	}
-	r.bitmap.Clear(uint(binary.BigEndian.Uint32(ip.IP.To4()))) // IP released
+
+	log.Printf("Freeing IP %s", ip.IP)
+	r.bitmap.Clear(uint(offset)) // IP released
 	return nil
 }
 

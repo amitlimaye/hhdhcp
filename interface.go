@@ -8,3 +8,9 @@ type IPv4Allocator interface {
 	Free(net.IPNet) error
 	GatewayIP() net.IP
 }
+
+type RecordBackend interface {
+	GetRange(key map[string]string) (*rangeRecord, error)
+	RecordAllocation(key map[string]string, alloc *allocationRecord) error
+	ReleaseAllocation(key map[string]string, ip net.IP, macAddress string) error
+}

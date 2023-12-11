@@ -8,28 +8,6 @@ import (
 	"github.com/coredhcp/coredhcp/plugins"
 )
 
-// DHCPSubnetSpec defines the desired state of DHCPSubnet
-// type DHCPSubnetSpec struct {
-// 	Subnet    string `json:"subnet"`    // e.g. vpc-0/default (vpc name + vpc subnet name)
-// 	CIDRBlock string `json:"cidrBlock"` // e.g. 10.10.10.0/24
-// 	Gateway   string `json:"gateway"`   // e.g. 10.10.10.1
-// 	StartIP   string `json:"startIP"`   // e.g. 10.10.10.10
-// 	EndIP     string `json:"endIP"`     // e.g. 10.10.10.99
-// 	VRF       string `json:"vrf"`       // e.g. VrfVvpc-1 as it's named on switch
-// 	CircuitID string `json:"circuitID"` // e.g. Vlan1000 as it's named on switch
-// }
-
-// // DHCPSubnetStatus defines the observed state of DHCPSubnet
-// type DHCPSubnetStatus struct {
-// 	AllocatedIPs map[string]DHCPAllocatedIP `json:"allocatedIPs,omitempty"`
-// }
-
-// type DHCPAllocatedIP struct {
-// 	Expiry   metav1.Time `json:"expiry"`
-// 	MAC      string      `json:"mac"`
-// 	Hostname string      `json:"hostname"` // from dhcp request
-// }
-
 type rangeRecord struct {
 	StartIP net.IP
 	EndIP   net.IP
@@ -49,7 +27,7 @@ type allocationRecord struct {
 	Expiry     time.Time
 }
 
-type recordBackend struct {
+type persistentBackend struct {
 	subnets map[string]*rangeRecord // This is temporary and we should be using a kubernetes backend
 }
 
@@ -65,11 +43,27 @@ type allocations struct {
 	pool IPv4Allocator
 	// Offers that have been made but we have not seen a request for. ip->mac address. This is temporary
 	// while we wait for dhcprequest. Sync to kubernetes backend and destroy this state.
-	pending *pendingAllocations
+	ipReservations *ipallocations
 }
 
-type pendingAllocations struct {
-	allocation map[string]string
+type reservationState uint32
+
+const (
+	unassigned reservationState = iota
+	pending    reservationState = 1
+	committed  reservationState = 2
+)
+
+type ipreservation struct {
+	address    net.IPNet
+	MacAddress string
+	expiry     time.Time
+	Hostname   string
+	state      reservationState
+}
+
+type ipallocations struct {
+	allocation map[string]*ipreservation
 	sync.RWMutex
 }
 type pluginState struct {
